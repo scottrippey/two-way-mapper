@@ -1,37 +1,50 @@
 import { mapMaker, Mapper } from "./mapper";
 
 describe("Test", () => {
-  describe("mapper.object", () => {
-    it("", () => {
-      const mapper = mapMaker.object({
-        id: mapMaker.copy<string>(),
-        desc: mapMaker.copy<string>(),
-        value: numberToString(),
-      });
-
-      const mapped = mapper.map({ id: "", desc: "", value: 5 });
-      expectType<string>(mapped.value);
-
-      const reverse = mapper.reverse({ id: "", desc: "", value: "5" });
-      expectType<number>(reverse.value);
+  describe("mapMaker.object", () => {
+    const mapper = mapMaker.object({
+      id: mapMaker.copy<string>(),
+      desc: mapMaker.copy<string>(),
+      value: numberToString(),
     });
-    it("", () => {
-      const mapper: Mapper<{ first: string; last: string }, string> = {
-        map: (input) => [input.first, input.last].join(" "),
-        reverse: (input) => {
-          const [first, last] = input.split(" ");
-          return { first, last };
-        },
-      };
 
-      const mapped = mapper.map({ first: "Scott", last: "Rippey" });
-      expectType<string>(mapped);
+    it("maps one object to another", () => {
+      const mapped = mapper.map({ id: "ID", desc: "DESC", value: 5 });
+      expectType<{ id: string; desc: string; value: string }>(mapped);
+      expect(mapped).toMatchInlineSnapshot(`
+        Object {
+          "desc": "DESC",
+          "id": "ID",
+          "value": "5",
+        }
+      `);
+    });
 
-      const reverse = mapper.reverse("Scott Rippey");
-      expectType<{ first: string; last: string }>(reverse);
+    it("maps objects in reverse", () => {
+      const reversed = mapper.reverse({ id: "ID", desc: "DESC", value: "5" });
+      expectType<{ id: string; desc: string; value: number }>(reversed);
+      expect(reversed).toMatchInlineSnapshot(`
+        Object {
+          "desc": "DESC",
+          "id": "ID",
+          "value": 5,
+        }
+      `);
+    });
+
+    it("missing values are not mapped", () => {
+      // @ts-ignore
+      const mapped = mapper.map({ id: "ID" });
+
+      expect(mapped).toMatchInlineSnapshot(`
+        Object {
+          "id": "ID",
+        }
+      `);
     });
   });
-  describe("mapper.asymmetric", () => {
+
+  describe.skip("mapMaker.asymmetric", () => {
     it("", () => {
       const left = {
         name: "Scott Rippey",
@@ -66,7 +79,7 @@ describe("Test", () => {
     };
   }
 
-  describe("mapper.combine", () => {
+  describe.skip("mapMaker.combine", () => {
     const map1 = mapMaker.object({
       first: mapMaker.copy<string>(),
     });

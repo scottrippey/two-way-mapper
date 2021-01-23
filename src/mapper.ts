@@ -6,21 +6,44 @@ export type Mapper<TLeft, TRight> = {
 export namespace mapMaker {
   export function object<TMappings extends { [P in string]: Mapper<any, any> }>(
     mappings: TMappings
-  ): Mapper<
-    { [P in keyof TMappings]: ReturnType<TMappings[P]["reverse"]> },
-    { [P in keyof TMappings]: ReturnType<TMappings[P]["map"]> }
-  > {
-    return null as any;
+  ) {
+    type TLeft = {
+      [P in keyof TMappings]: ReturnType<TMappings[P]["reverse"]>;
+    };
+    type TRight = { [P in keyof TMappings]: ReturnType<TMappings[P]["map"]> };
+
+    const keys = Object.keys(mappings) as Array<keyof TMappings>;
+    const mapper: Mapper<TLeft, TRight> = {
+      map: (input) => {
+        const result = {} as TRight;
+        for (const key of keys) {
+          if (key in input) {
+            result[key] = mappings[key].map(input[key]);
+          }
+        }
+        return result;
+      },
+      reverse: (input) => {
+        const result = {} as TLeft;
+        for (const key of keys) {
+          if (key in input) {
+            result[key] = mappings[key].reverse(input[key]);
+          }
+        }
+        return result;
+      },
+    };
+    return mapper;
   }
 }
 
 export namespace mapMaker {
-  export type MapperConfig<TLeft, TRight> = {
+  export type MapperOneWay<TLeft, TRight> = {
     [P in keyof TLeft]: (input: TRight) => TLeft[P];
   };
   export function asymmetric<TLeft, TRight>(config: {
-    map: MapperConfig<TLeft, TRight>;
-    reverse: MapperConfig<TRight, TLeft>;
+    map: MapperOneWay<TLeft, TRight>;
+    reverse: MapperOneWay<TRight, TLeft>;
   }): Mapper<TLeft, TRight> {
     return null as any;
   }
