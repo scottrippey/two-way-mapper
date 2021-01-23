@@ -44,31 +44,33 @@ describe("Test", () => {
     });
   });
 
-  describe.skip("mapMaker.asymmetric", () => {
-    it("", () => {
-      const left = {
-        name: "Scott Rippey",
-      };
-      const right = {
-        first: "Scott",
-        last: "Rippey",
-      };
+  describe("mapMaker.asymmetric", () => {
+    const left = {
+      name: "Scott Rippey",
+    };
+    const right = {
+      first: "Scott",
+      last: "Rippey",
+    };
 
-      const mapper = mapMaker.asymmetric<typeof left, typeof right>({
-        map: {
-          name: (right) => [right.first, right.last].join(" "),
-        },
-        reverse: {
-          first: (left) => left.name.split(" ")[0],
-          last: (left) => left.name.split(" ")[1],
-        },
-      });
-
+    const mapper = mapMaker.asymmetric<typeof left, typeof right>({
+      map: {
+        first: (left) => left.name.split(" ")[0],
+        last: (left) => left.name.split(" ")[1],
+      },
+      reverse: {
+        name: (right) => [right.first, right.last].join(" "),
+      },
+    });
+    it("should map an object", () => {
       const mapped = mapper.map(left);
       expectType<{ first: string; last: string }>(mapped);
-
+      expect(mapped).toEqual(right);
+    });
+    it("should reverse map an object", () => {
       const reversed = mapper.reverse(right);
       expectType<{ name: string }>(reversed);
+      expect(reversed).toEqual(left);
     });
   });
 

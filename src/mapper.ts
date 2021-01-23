@@ -39,13 +39,34 @@ export namespace mapMaker {
 
 export namespace mapMaker {
   export type MapperOneWay<TLeft, TRight> = {
-    [P in keyof TLeft]: (input: TRight) => TLeft[P];
+    [P in keyof TRight]: (input: TLeft) => TRight[P];
   };
   export function asymmetric<TLeft, TRight>(config: {
     map: MapperOneWay<TLeft, TRight>;
     reverse: MapperOneWay<TRight, TLeft>;
   }): Mapper<TLeft, TRight> {
-    return null as any;
+    const keysRight = Object.keys(config.map) as Array<keyof TRight>;
+    const keysLeft = Object.keys(config.reverse) as Array<keyof TLeft>;
+
+    const mapper: Mapper<TLeft, TRight> = {
+      map: (input) => {
+        const result = {} as TRight;
+        for (const key of keysRight) {
+          const value = config.map[key](input);
+          result[key] = value;
+        }
+        return result;
+      },
+      reverse: (input) => {
+        const result = {} as TLeft;
+        for (const key of keysLeft) {
+          const value = config.reverse[key](input);
+          result[key] = value;
+        }
+        return result;
+      },
+    };
+    return mapper;
   }
 }
 
