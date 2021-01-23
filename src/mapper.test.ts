@@ -1,101 +1,141 @@
 import { mapMaker, Mapper } from "./mapper";
 
-describe("Test", () => {
-  describe("mapMaker.object", () => {
-    const mapper = mapMaker.object({
-      id: mapMaker.copy<string>(),
-      desc: mapMaker.copy<string>(),
-      value: numberToString(),
-    });
+describe("mapMaker", () => {
+  type UserA = {
+    id: string;
+    nickName: string;
 
+    fullName: string;
+
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zip: string;
+    };
+  };
+
+  type UserB = {
+    id: number;
+    nickName: string;
+
+    firstName: string;
+    lastName: string;
+
+    address: string;
+  };
+
+  const commonMapper = mapMaker.object({
+    id: mapMaker.convert<string, number>(Number, String),
+    nickName: mapMaker.copy<string>(),
+  });
+
+  describe("mapMaker.object", () => {
     it("maps one object to another", () => {
-      const mapped = mapper.map({ id: "ID", desc: "DESC", value: 5 });
-      expectType<{ id: string; desc: string; value: string }>(mapped);
-      expect(mapped).toMatchInlineSnapshot(`
-        Object {
-          "desc": "DESC",
-          "id": "ID",
-          "value": "5",
-        }
-      `);
+      const mapped = commonMapper.map({ id: "5", nickName: "Nick" });
+      expectType<{ id: number; nickName: string }>(mapped);
+      expect(mapped).toEqual({ id: 5, nickName: "Nick" });
     });
 
     it("maps objects in reverse", () => {
-      const reversed = mapper.reverse({ id: "ID", desc: "DESC", value: "5" });
-      expectType<{ id: string; desc: string; value: number }>(reversed);
-      expect(reversed).toMatchInlineSnapshot(`
-        Object {
-          "desc": "DESC",
-          "id": "ID",
-          "value": 5,
-        }
-      `);
+      const reversed = commonMapper.reverse({ id: 5, nickName: "Nick" });
+      expectType<{ id: string; nickName: string }>(reversed);
+      expect(reversed).toEqual({ id: "5", nickName: "Nick" });
     });
 
-    it("missing values are not mapped", () => {
+    it("missing or extra values are not mapped", () => {
       // @ts-ignore
-      const mapped = mapper.map({ id: "ID" });
-
-      expect(mapped).toMatchInlineSnapshot(`
-        Object {
-          "id": "ID",
-        }
-      `);
+      const mapped = commonMapper.map({ id: "5", foo: "FOO" });
+      expect(mapped).toEqual({ id: 5 });
     });
+  });
+
+  const nameMapper = mapMaker.asymmetric<
+    Pick<UserA, "fullName">,
+    Pick<UserB, "firstName" | "lastName">
+  >({
+    map: {
+      firstName: (userA) => userA.fullName.split(" ")[0],
+      lastName: (userA) => userA.fullName.split(" ")[1],
+    },
+    reverse: {
+      fullName: (userB) => [userB.firstName, userB.lastName].join(" "),
+    },
+  });
+
+  const addressMapper = mapMaker.asymmetric<
+    Pick<UserA, "address">,
+    Pick<UserB, "address">
+  >({
+    map: {
+      address: (userA) =>
+        [
+          userA.address.street,
+          userA.address.city,
+          userA.address.state + " " + userA.address.zip,
+        ].join(", "),
+    },
+    reverse: {
+      address: (userB) => {
+        const [street, city, stateZip] = userB.address.split(", ");
+        const [state, zip] = stateZip.split(" ");
+        return { street, city, state, zip };
+      },
+    },
   });
 
   describe("mapMaker.asymmetric", () => {
-    const left = {
-      name: "Scott Rippey",
+    const userA = {
+      fullName: "Scott Rippey",
     };
     const right = {
-      first: "Scott",
-      last: "Rippey",
+      firstName: "Scott",
+      lastName: "Rippey",
     };
 
-    const mapper = mapMaker.asymmetric<typeof left, typeof right>({
-      map: {
-        first: (left) => left.name.split(" ")[0],
-        last: (left) => left.name.split(" ")[1],
-      },
-      reverse: {
-        name: (right) => [right.first, right.last].join(" "),
-      },
-    });
     it("should map an object", () => {
-      const mapped = mapper.map(left);
-      expectType<{ first: string; last: string }>(mapped);
+      const mapped = nameMapper.map(userA);
+      expectType<{ firstName: string; lastName: string }>(mapped);
       expect(mapped).toEqual(right);
     });
     it("should reverse map an object", () => {
-      const reversed = mapper.reverse(right);
-      expectType<{ name: string }>(reversed);
-      expect(reversed).toEqual(left);
+      const reversed = nameMapper.reverse(right);
+      expectType<{ fullName: string }>(reversed);
+      expect(reversed).toEqual(userA);
     });
   });
 
-  function numberToString(): Mapper<number, string> {
-    return {
-      map: (val: number) => val.toString(),
-      reverse: (val) => Number(val),
+  const userMapper = mapMaker.combine(commonMapper, nameMapper, addressMapper);
+
+  describe("mapMaker.combine", () => {
+    const userA: UserA = {
+      id: "5",
+      nickName: "Scooter",
+      fullName: "Scott Rippey",
+      address: {
+        street: "1 Main St",
+        city: "Eagle",
+        state: "ID",
+        zip: "83616",
+      },
     };
-  }
-
-  describe.skip("mapMaker.combine", () => {
-    const map1 = mapMaker.object({
-      first: mapMaker.copy<string>(),
+    const userB: UserB = {
+      id: 5,
+      nickName: "Scooter",
+      firstName: "Scott",
+      lastName: "Rippey",
+      address: "1 Main St, Eagle, ID 83616",
+    };
+    it("should map an object", () => {
+      const mapped = userMapper.map(userA);
+      expectType<UserB>(mapped);
+      expect(mapped).toEqual(userB);
     });
-    const map2 = mapMaker.object({
-      last: mapMaker.copy<string>(),
+    it("should reverse map an object", () => {
+      const reversed = userMapper.reverse(userB);
+      expectType<UserA>(reversed);
+      expect(reversed).toEqual(userA);
     });
-    const mapper = mapMaker.combine(map1, map2);
-
-    const first = "Scott";
-    const last = "Rippey";
-    expectType<{ first: string; last: string }>(mapper.map({ first, last }));
-    expectType<{ first: string; last: string }>(
-      mapper.reverse({ first, last })
-    );
   });
 });
 

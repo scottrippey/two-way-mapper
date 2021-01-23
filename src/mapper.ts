@@ -119,17 +119,37 @@ export namespace mapMaker {
     TLeft1 & TLeft2 & TLeft3 & TLeft4 & TLeft5,
     TRight1 & TRight2 & TRight3 & TRight4 & TRight5
   >;
-  export function combine(
-    mapper1: Mapper<unknown, unknown>,
-    mapper2: Mapper<unknown, unknown>,
-    mapper3?: Mapper<unknown, unknown>,
-    mapper4?: Mapper<unknown, unknown>,
-    mapper5?: Mapper<unknown, unknown>
-  ) {
-    return null as any;
+  export function combine(...mappers: Array<Mapper<unknown, unknown>>) {
+    const mapper: Mapper<unknown, unknown> = {
+      map: (input) => {
+        const result = {};
+        for (const m of mappers) {
+          const mappedValue = m.map(input);
+          Object.assign(result, mappedValue);
+        }
+        return result;
+      },
+      reverse: (input) => {
+        const result = {};
+        for (const m of mappers) {
+          const mappedValue = m.reverse(input);
+          Object.assign(result, mappedValue);
+        }
+        return result;
+      },
+    };
+    return mapper;
   }
+}
 
+export namespace mapMaker {
   export function copy<T>(): Mapper<T, T> {
     return { map: (val) => val, reverse: (val) => val };
+  }
+  export function convert<TLeft, TRight>(
+    map: (value: TLeft) => TRight,
+    reverse: (value: TRight) => TLeft
+  ): Mapper<TLeft, TRight> {
+    return { map, reverse };
   }
 }
