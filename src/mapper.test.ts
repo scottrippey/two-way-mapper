@@ -1,4 +1,4 @@
-import { mapMaker, Mapper } from "./mapper";
+import { mapAsymmetric, mapCombine, mapObject, utils } from "./mapper";
 
 describe("mapMaker", () => {
   type UserA = {
@@ -25,9 +25,9 @@ describe("mapMaker", () => {
     address: string;
   };
 
-  const commonMapper = mapMaker.object({
-    id: mapMaker.convert<string, number>(Number, String),
-    nickName: mapMaker.copy<string>(),
+  const commonMapper = mapObject({
+    id: utils.convert<string, number>(Number, String),
+    nickName: utils.copy<string>(),
   });
 
   describe("mapMaker.object", () => {
@@ -50,7 +50,7 @@ describe("mapMaker", () => {
     });
   });
 
-  const nameMapper = mapMaker.asymmetric<
+  const nameMapper = mapAsymmetric<
     Pick<UserA, "fullName">,
     Pick<UserB, "firstName" | "lastName">
   >({
@@ -63,7 +63,7 @@ describe("mapMaker", () => {
     },
   });
 
-  const addressMapper = mapMaker.asymmetric<
+  const addressMapper = mapAsymmetric<
     Pick<UserA, "address">,
     Pick<UserB, "address">
   >({
@@ -105,7 +105,7 @@ describe("mapMaker", () => {
     });
   });
 
-  const userMapper = mapMaker.combine(commonMapper, nameMapper, addressMapper);
+  const userMapper = mapCombine(commonMapper, nameMapper, addressMapper);
 
   describe("mapMaker.combine", () => {
     const userA: UserA = {
