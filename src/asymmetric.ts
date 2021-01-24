@@ -4,7 +4,7 @@ export type MapperOneWay<TLeft, TRight> = {
   [P in keyof TRight]: (input: TLeft) => TRight[P];
 };
 
-export function mapAsymmetric<TLeft, TRight>(config: {
+export function asymmetric<TLeft, TRight>(config: {
   map: MapperOneWay<TLeft, TRight>;
   reverse: MapperOneWay<TRight, TLeft>;
 }): Mapper<TLeft, TRight> {

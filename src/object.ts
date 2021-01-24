@@ -5,14 +5,14 @@ import { Mapper } from "./types";
  * Property values can be the same or completely different types.
  *
  * @example
- * const mapper = mapObject({
+ * const mapper = map.object({
  *   id: utils.copy<string>(),
  *   address: addressMapper,
  * });
  *
  * @param propertyMappers
  */
-export function mapObject<
+export function object<
   TPropertyMappers extends { [P in string]: Mapper<any, any> }
 >(propertyMappers: TPropertyMappers) {
   type TLeft = {

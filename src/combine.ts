@@ -1,15 +1,15 @@
 import { Mapper } from "./types";
 
-export function mapCombine<TLeft1, TRight1, TLeft2, TRight2>(
+export function combine<TLeft1, TRight1, TLeft2, TRight2>(
   mapper1: Mapper<TLeft1, TRight1>,
   mapper2: Mapper<TLeft2, TRight2>
 ): Mapper<TLeft1 & TLeft2, TRight1 & TRight2>;
-export function mapCombine<TLeft1, TRight1, TLeft2, TRight2, TLeft3, TRight3>(
+export function combine<TLeft1, TRight1, TLeft2, TRight2, TLeft3, TRight3>(
   mapper1: Mapper<TLeft1, TRight1>,
   mapper2: Mapper<TLeft2, TRight2>,
   mapper3: Mapper<TLeft3, TRight3>
 ): Mapper<TLeft1 & TLeft2 & TLeft3, TRight1 & TRight2 & TRight3>;
-export function mapCombine<
+export function combine<
   TLeft1,
   TRight1,
   TLeft2,
@@ -27,7 +27,7 @@ export function mapCombine<
   TLeft1 & TLeft2 & TLeft3 & TLeft4,
   TRight1 & TRight2 & TRight3 & TRight4
 >;
-export function mapCombine<
+export function combine<
   TLeft1,
   TRight1,
   TLeft2,
@@ -48,7 +48,7 @@ export function mapCombine<
   TLeft1 & TLeft2 & TLeft3 & TLeft4 & TLeft5,
   TRight1 & TRight2 & TRight3 & TRight4 & TRight5
 >;
-export function mapCombine(...mappers: Array<Mapper<unknown, unknown>>) {
+export function combine(...mappers: Array<Mapper<unknown, unknown>>) {
   const mapper: Mapper<unknown, unknown> = {
     map: (input) => {
       const result = {};
