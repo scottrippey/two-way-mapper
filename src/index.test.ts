@@ -34,7 +34,7 @@ const addressMapper = map.convert<UserA["address"], UserB["address"]>(
   }
 );
 
-const userCommonMapper = map.object({
+const userCommonMapper = map.object<UserA, UserB, "id" | "nickName">({
   id: map.convert(Number, String),
   nickName: map.copyString,
 });
@@ -91,7 +91,7 @@ describe("asymmetric", () => {
   });
 });
 
-const userAddressMapper = map.object({
+const userAddressMapper = map.object<UserA, UserB, "address">({
   address: addressMapper,
 });
 

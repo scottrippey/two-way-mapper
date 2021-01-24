@@ -13,21 +13,20 @@ import { Mapper } from "./types";
  * @param propertyMappers
  */
 export function object<
-  TPropertyMappers extends { [P in string]: Mapper<any, any> }
->(propertyMappers: TPropertyMappers) {
-  type TLeft = {
-    [P in keyof TPropertyMappers]: ReturnType<TPropertyMappers[P]["reverse"]>;
-  };
-  type TRight = {
-    [P in keyof TPropertyMappers]: ReturnType<TPropertyMappers[P]["map"]>;
-  };
-
-  const keys = Object.keys(propertyMappers) as Array<keyof TPropertyMappers>;
-  const mapper: Mapper<TLeft, TRight> = {
+  TLeft,
+  TRight,
+  TCommonKeys extends keyof (TLeft | TRight) = keyof (TLeft | TRight)
+>(
+  propertyMappers: {
+    [P in TCommonKeys]: Mapper<TLeft[P], TRight[P]>;
+  }
+): Mapper<Pick<TLeft, TCommonKeys>, Pick<TRight, TCommonKeys>> {
+  const keys = Object.keys(propertyMappers) as Array<TCommonKeys>;
+  return {
     map: (input) => {
       const result = {} as TRight;
       for (const key of keys) {
-        if (key in input) {
+        if ((key as any) in input) {
           result[key] = propertyMappers[key].map(input[key]);
         }
       }
@@ -36,12 +35,11 @@ export function object<
     reverse: (input) => {
       const result = {} as TLeft;
       for (const key of keys) {
-        if (key in input) {
+        if ((key as any) in input) {
           result[key] = propertyMappers[key].reverse(input[key]);
         }
       }
       return result;
     },
   };
-  return mapper;
 }
