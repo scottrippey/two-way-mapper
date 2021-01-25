@@ -1,21 +1,21 @@
 import { Mapper } from "./types";
 
-export type MapperOneWay<TLeft, TRight> = {
+export type OneWayMappers<TLeft, TRight> = {
   [P in keyof TRight]: (input: TLeft) => TRight[P];
 };
 
-export function asymmetric<TLeft, TRight>(config: {
-  map: MapperOneWay<TLeft, TRight>;
-  reverse: MapperOneWay<TRight, TLeft>;
-}): Mapper<TLeft, TRight> {
-  const keysRight = Object.keys(config.map) as Array<keyof TRight>;
-  const keysLeft = Object.keys(config.reverse) as Array<keyof TLeft>;
+export function asymmetric<TLeft, TRight>(
+  leftMappers: OneWayMappers<TLeft, TRight>,
+  rightMappers: OneWayMappers<TRight, TLeft>
+): Mapper<TLeft, TRight> {
+  const keysRight = Object.keys(leftMappers) as Array<keyof TRight>;
+  const keysLeft = Object.keys(rightMappers) as Array<keyof TLeft>;
 
   const mapper: Mapper<TLeft, TRight> = {
     map: (input) => {
       const result = {} as TRight;
       for (const key of keysRight) {
-        const value = config.map[key](input);
+        const value = leftMappers[key](input);
         result[key] = value;
       }
       return result;
@@ -23,7 +23,7 @@ export function asymmetric<TLeft, TRight>(config: {
     reverse: (input) => {
       const result = {} as TLeft;
       for (const key of keysLeft) {
-        const value = config.reverse[key](input);
+        const value = rightMappers[key](input);
         result[key] = value;
       }
       return result;

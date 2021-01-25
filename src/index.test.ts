@@ -55,15 +55,15 @@ describe("object", () => {
 const userNameMapper = map.asymmetric<
   Pick<UserA, "fullName">,
   Pick<UserB, "firstName" | "lastName">
->({
-  map: {
+>(
+  {
     firstName: (userA) => userA.fullName.split(" ")[0],
     lastName: (userA) => userA.fullName.split(" ")[1],
   },
-  reverse: {
+  {
     fullName: (userB) => [userB.firstName, userB.lastName].join(" "),
-  },
-});
+  }
+);
 describe("asymmetric", () => {
   const userA = {
     fullName: "Scott Rippey",
