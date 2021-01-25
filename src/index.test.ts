@@ -3,8 +3,8 @@ import { map } from "./index";
 function expectType<T>(arg: T) {}
 
 type UserA = {
-  id: string;
-  nickName: string;
+  id: number;
+  active: "yes" | "no";
 
   fullName: string;
 
@@ -17,7 +17,7 @@ type UserA = {
 };
 type UserB = {
   id: number;
-  nickName: string;
+  active: boolean;
 
   firstName: string;
   lastName: string;
@@ -25,35 +25,29 @@ type UserB = {
   address: string;
 };
 
-const addressMapper = map.convert<UserA["address"], UserB["address"]>(
-  (addr) => `${addr.street}, ${addr.city}, ${addr.state} ${addr.zip}`,
-  (addr) => {
-    const [street, city, stateZip] = addr.split(", ");
-    const [state, zip] = stateZip.split(" ");
-    return { street, city, state, zip };
-  }
-);
-
-const userCommonMapper = map.object<UserA, UserB, "id" | "nickName">({
-  id: map.convert(Number, String),
-  nickName: map.copyString,
+const userCommonMapper = map.object<UserA, UserB, "id" | "active">({
+  id: map.copy,
+  active: map.convert(
+    (active) => active === "yes",
+    (active) => (active ? "yes" : "no")
+  ),
 });
 describe("object", () => {
   it("maps one object to another", () => {
-    const mapped = userCommonMapper.map({ id: "5", nickName: "Nick" });
-    expectType<{ id: number; nickName: string }>(mapped);
-    expect(mapped).toEqual({ id: 5, nickName: "Nick" });
+    const mapped = userCommonMapper.map({ id: 5, active: "yes" });
+    expectType<{ id: number; active: boolean }>(mapped);
+    expect(mapped).toEqual({ id: 5, active: "yes" });
   });
 
   it("maps objects in reverse", () => {
-    const reversed = userCommonMapper.reverse({ id: 5, nickName: "Nick" });
-    expectType<{ id: string; nickName: string }>(reversed);
-    expect(reversed).toEqual({ id: "5", nickName: "Nick" });
+    const reversed = userCommonMapper.reverse({ id: 5, active: true });
+    expectType<{ id: number; active: "yes" | "no" }>(reversed);
+    expect(reversed).toEqual({ id: 5, active: "yes" });
   });
 
   it("missing or extra values are not mapped", () => {
     // @ts-ignore
-    const mapped = userCommonMapper.map({ id: "5", foo: "FOO" });
+    const mapped = userCommonMapper.map({ id: 5, foo: "FOO" });
     expect(mapped).toEqual({ id: 5 });
   });
 });
@@ -92,7 +86,14 @@ describe("asymmetric", () => {
 });
 
 const userAddressMapper = map.object<UserA, UserB, "address">({
-  address: addressMapper,
+  address: map.convert(
+    (addr) => `${addr.street}, ${addr.city}, ${addr.state} ${addr.zip}`,
+    (addr) => {
+      const [street, city, stateZip] = addr.split(", ");
+      const [state, zip] = stateZip.split(" ");
+      return { street, city, state, zip };
+    }
+  ),
 });
 
 const userMapper = map.combine(
@@ -100,10 +101,10 @@ const userMapper = map.combine(
   userNameMapper,
   userAddressMapper
 );
-describe("mapCombine", () => {
+describe("combine", () => {
   const userA: UserA = {
-    id: "5",
-    nickName: "Scooter",
+    id: 5,
+    active: "yes",
     fullName: "Scott Rippey",
     address: {
       street: "1 Main St",
@@ -114,7 +115,7 @@ describe("mapCombine", () => {
   };
   const userB: UserB = {
     id: 5,
-    nickName: "Scooter",
+    active: true,
     firstName: "Scott",
     lastName: "Rippey",
     address: "1 Main St, Eagle, ID 83616",

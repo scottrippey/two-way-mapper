@@ -1,15 +1,15 @@
 import { Mapper } from "./types";
 
-export const copyAny: Mapper<any, any> = {
+export const copy: Mapper<any, any> = {
   map: (val) => val,
   reverse: (val) => val,
 };
-// These are all just strongly-typed aliases for `copyAny`:
-export const copyString = copyAny as Mapper<string, string>;
-export const copyNumber = copyAny as Mapper<number, number>;
-export const copyBoolean = copyAny as Mapper<boolean, boolean>;
-export const copyAs = <T>() => copyAny as Mapper<T, T>;
-export const cast = <TLeft, TRight>() => copyAny as Mapper<TLeft, TRight>;
+// These are all just strongly-typed aliases for `copy`:
+export const copyString = copy as Mapper<string, string>;
+export const copyNumber = copy as Mapper<number, number>;
+export const copyBoolean = copy as Mapper<boolean, boolean>;
+export const copyAs = <T>() => copy as Mapper<T, T>;
+export const cast = <TLeft, TRight>() => copy as Mapper<TLeft, TRight>;
 
 export function convert<TLeft, TRight>(
   map: (value: TLeft) => TRight,
