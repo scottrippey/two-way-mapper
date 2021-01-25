@@ -1,4 +1,4 @@
-import { mapper } from "./mapper";
+import { mapper } from "./index";
 
 function expectType<T>(arg: T) {}
 
