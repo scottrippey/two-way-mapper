@@ -36,7 +36,7 @@ describe("object", () => {
   it("maps one object to another", () => {
     const mapped = userCommonMapper.map({ id: 5, active: "yes" });
     expectType<{ id: number; active: boolean }>(mapped);
-    expect(mapped).toEqual({ id: 5, active: "yes" });
+    expect(mapped).toEqual({ id: 5, active: true });
   });
 
   it("maps objects in reverse", () => {
@@ -85,15 +85,16 @@ describe("asymmetric", () => {
   });
 });
 
+const addressMapper = map.convert<UserA["address"], UserB["address"]>(
+  (addr) => `${addr.street}, ${addr.city}, ${addr.state} ${addr.zip}`,
+  (addr) => {
+    const [street, city, stateZip] = addr.split(", ");
+    const [state, zip] = stateZip.split(" ");
+    return { street, city, state, zip };
+  }
+);
 const userAddressMapper = map.object<UserA, UserB, "address">({
-  address: map.convert(
-    (addr) => `${addr.street}, ${addr.city}, ${addr.state} ${addr.zip}`,
-    (addr) => {
-      const [street, city, stateZip] = addr.split(", ");
-      const [state, zip] = stateZip.split(" ");
-      return { street, city, state, zip };
-    }
-  ),
+  address: addressMapper,
 });
 
 const userMapper = map.combine(
@@ -129,5 +130,27 @@ describe("combine", () => {
     const reversed = userMapper.reverse(userB);
     expectType<UserA>(reversed);
     expect(reversed).toEqual(userA);
+  });
+});
+
+const addressArrayMapper = map.array(addressMapper);
+describe("array", () => {
+  const addressObjects: Array<UserA["address"]> = [
+    { street: "1 Main Street", city: "Eagle", state: "ID", zip: "83616" },
+    { street: "2 Second Street", city: "New York", state: "NY", zip: "10001" },
+  ];
+  const addressStrings = [
+    "1 Main Street, Eagle, ID 83616",
+    "2 Second Street, New York, NY 10001",
+  ];
+  it("should map an array of items", () => {
+    const mapped = addressArrayMapper.map(addressObjects);
+    expectType<string[]>(mapped);
+    expect(mapped).toEqual(addressStrings);
+  });
+  it("should reverse map an array of items", () => {
+    const reversed = addressArrayMapper.reverse(addressStrings);
+    expectType<UserA["address"][]>(reversed);
+    expect(reversed).toEqual(addressObjects);
   });
 });
