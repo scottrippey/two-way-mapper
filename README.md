@@ -10,7 +10,7 @@ Strong TypeScript support.
 
 - [Quick Start](#quick-start)
 - [Primary Methods](#primary-methods)
-  - [`mapper.object(propertyMappers)` - Maps between objects with similar properties](#mapperobjectpropertymappers---maps-between-objects-with-similar-properties)
+  - [`mapper.properties(propertyMappers)` - Maps between objects with similar properties](#mapperpropertiespropertymappers---maps-between-objects-with-similar-properties)
   - [`mapper.asymmetric(leftMappers, rightMappers)` - Maps objects with different properties](#mapperasymmetricleftmappers-rightmappers---maps-objects-with-different-properties)
   - [`mapper.combine(...mappers)` - Combines multiple mappers into a single mapper](#mappercombinemappers---combines-multiple-mappers-into-a-single-mapper)
 - [Utilities](#utilities)
@@ -41,19 +41,19 @@ As you can see, the `map` method converts from `TLeft` to `TRight`.  The `revers
 
 # Primary Methods
 
-## `mapper.object(propertyMappers)` - Maps between objects with similar properties
+## `mapper.properties(propertyMappers)` - Maps between objects with similar properties
 Let's convert between two **similar** `User` types:
 ```ts
 const userA: UserA = { name: "Scott", active: "yes" };
 const userB: UserB = { name: "Scott", active: true };
 ```
 
-With `mapper.object`, we supply a `Mapper` for each property:
+With `mapper.properties`, we supply a `Mapper` for each property:
 
 ```ts
 import { mapper } from "two-way-mapper";
 
-const userMapper = mapper.object<UserA, UserB>({
+const userMapper = mapper.properties<UserA, UserB>({
   // Properties with the same name & type can simply be copied:
   name: mapper.copy,
   
@@ -100,10 +100,10 @@ Now, let's convert between two `User` types that have a mix of **similar** and *
 const userA: UserA = { id: 5, name: "Scott", status: "active" };
 const userB: UserB = { id: 5, name: "Scott", active: true };
 ```
-We can use `mapper.combine` to use both `mapper.object` and `mapper.asymmetric` in the same mapper:
+We can use `mapper.combine` to use both `mapper.properties` and `mapper.asymmetric` in the same mapper:
 ```ts
 const userMapper = mapper.combine(
-  mapper.object<UserA, UserB>({
+  mapper.properties<UserA, UserB>({
     id: mapper.copy,
     name: mapper.copy,
   }),
@@ -132,7 +132,7 @@ You can also use these strongly-typed variants:
 ## Utilities Example
 
 ```ts
-const userMapper = mapper.object<UserA, UserB>({
+const userMapper = mapper.properties<UserA, UserB>({
   // Converts all items in the array using itemMapper:
   items: mapper.array(itemMapper),
   

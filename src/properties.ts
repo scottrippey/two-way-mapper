@@ -1,18 +1,6 @@
 import { Mapper } from "./types";
 
-/**
- * Creates a two-way Mapper for objects that share property names.
- * Property values can be the same or completely different types.
- *
- * @example
- * const mapper = map.object({
- *   id: utils.copy<string>(),
- *   address: addressMapper,
- * });
- *
- * @param propertyMappers
- */
-export function object<
+export function properties<
   TLeft,
   TRight,
   TCommonKeys extends keyof (TLeft | TRight) = keyof (TLeft | TRight)

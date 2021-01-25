@@ -25,14 +25,14 @@ type UserB = {
   address: string;
 };
 
-const userCommonMapper = mapper.object<UserA, UserB, "id" | "active">({
+const userCommonMapper = mapper.properties<UserA, UserB, "id" | "active">({
   id: mapper.copy,
   active: mapper.convert(
     (active) => active === "yes",
     (active) => (active ? "yes" : "no")
   ),
 });
-describe("object", () => {
+describe("properties", () => {
   it("maps one object to another", () => {
     const mapped = userCommonMapper.map({ id: 5, active: "yes" });
     expectType<{ id: number; active: boolean }>(mapped);
@@ -93,7 +93,7 @@ const addressMapper = mapper.convert<UserA["address"], UserB["address"]>(
     return { street, city, state, zip };
   }
 );
-const userAddressMapper = mapper.object<UserA, UserB, "address">({
+const userAddressMapper = mapper.properties<UserA, UserB, "address">({
   address: addressMapper,
 });
 
