@@ -1,5 +1,5 @@
 {
-  "name": "map-maker",
+  "name": "two-way-mapper",
   "version": "0.0.1",
   "description": "",
   "main": "dist/index.js",
@@ -20,15 +20,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/scottrippey/map-maker.git"
+    "url": "git+https://github.com/scottrippey/two-way-mapper.git"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/scottrippey/map-maker/issues"
+    "url": "https://github.com/scottrippey/two-way-mapper/issues"
   },
-  "homepage": "https://github.com/scottrippey/map-maker#readme",
+  "homepage": "https://github.com/scottrippey/two-way-mapper#readme",
   "dependencies": {},
   "devDependencies": {
     "@types/jest": "^26.0.20",
