@@ -8,6 +8,7 @@
     "src"
   ],
   "scripts": {
+    "docs": "doctoc README.md",
     "test": "jest",
     "test:watch": "jest --watch",
     "build": "npm run build:clean && tsc",
@@ -31,6 +32,7 @@
   "dependencies": {},
   "devDependencies": {
     "@types/jest": "^26.0.20",
+    "doctoc": "^2.0.0",
     "jest": "^26.6.3",
     "prettier": "^2.2.1",
     "ts-jest": "^26.4.4",
