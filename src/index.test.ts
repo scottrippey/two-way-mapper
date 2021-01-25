@@ -1,4 +1,4 @@
-import { map } from "./index";
+import { mapper } from "./index";
 
 function expectType<T>(arg: T) {}
 
@@ -25,9 +25,9 @@ type UserB = {
   address: string;
 };
 
-const userCommonMapper = map.object<UserA, UserB, "id" | "active">({
-  id: map.copy,
-  active: map.convert(
+const userCommonMapper = mapper.object<UserA, UserB, "id" | "active">({
+  id: mapper.copy,
+  active: mapper.convert(
     (active) => active === "yes",
     (active) => (active ? "yes" : "no")
   ),
@@ -52,7 +52,7 @@ describe("object", () => {
   });
 });
 
-const userNameMapper = map.asymmetric<
+const userNameMapper = mapper.asymmetric<
   Pick<UserA, "fullName">,
   Pick<UserB, "firstName" | "lastName">
 >(
@@ -85,7 +85,7 @@ describe("asymmetric", () => {
   });
 });
 
-const addressMapper = map.convert<UserA["address"], UserB["address"]>(
+const addressMapper = mapper.convert<UserA["address"], UserB["address"]>(
   (addr) => `${addr.street}, ${addr.city}, ${addr.state} ${addr.zip}`,
   (addr) => {
     const [street, city, stateZip] = addr.split(", ");
@@ -93,11 +93,11 @@ const addressMapper = map.convert<UserA["address"], UserB["address"]>(
     return { street, city, state, zip };
   }
 );
-const userAddressMapper = map.object<UserA, UserB, "address">({
+const userAddressMapper = mapper.object<UserA, UserB, "address">({
   address: addressMapper,
 });
 
-const userMapper = map.combine(
+const userMapper = mapper.combine(
   userCommonMapper,
   userNameMapper,
   userAddressMapper
@@ -133,7 +133,7 @@ describe("combine", () => {
   });
 });
 
-const addressArrayMapper = map.array(addressMapper);
+const addressArrayMapper = mapper.array(addressMapper);
 describe("array", () => {
   const addressObjects: Array<UserA["address"]> = [
     { street: "1 Main Street", city: "Eagle", state: "ID", zip: "83616" },
