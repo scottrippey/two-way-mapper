@@ -1,31 +1,11 @@
 import { mapper } from "./index";
-
-type UserA = {
-  id: number;
-
-  fullName: string;
-
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zip: string;
-  };
-};
-type UserB = {
-  id: number;
-
-  firstName: string;
-  lastName: string;
-
-  fullAddress: string;
-};
+import { expectEqual, userA, UserA, userB, UserB } from "./test-utils";
 
 const addressMapper = mapper.oneWay<
   Pick<UserA, "address">,
-  Pick<UserB, "fullAddress">
+  Pick<UserB, "address">
 >({
-  fullAddress: ({ address: { street, city, state, zip } }) =>
+  address: ({ address: { street, city, state, zip } }) =>
     `${street}, ${city}, ${state} ${zip}`,
 });
 
@@ -40,7 +20,7 @@ describe("oneWay", () => {
       },
     });
     expectEqual(mapped, {
-      fullAddress: "1 Main Street, Eagle, ID 83616",
+      address: "1 Main Street, Eagle, ID 83616",
     });
   });
   it("should NOT reverse map", () => {
@@ -71,12 +51,36 @@ describe("oneWayReverse", () => {
 });
 
 const userMapper = mapper.combine(
-  mapper.properties<UserA, UserB>({
+  mapper.properties<UserA, UserB, "id">({
     id: mapper.copy,
   }),
   addressMapper,
   nameMapper
 );
+
+export const userNameMapper = mapper.twoWay<
+  Pick<UserA, "fullName">,
+  Pick<UserB, "firstName" | "lastName">
+>(
+  {
+    firstName: (userA) => userA.fullName.split(" ")[0],
+    lastName: (userA) => userA.fullName.split(" ")[1],
+  },
+  {
+    fullName: (userB) => [userB.firstName, userB.lastName].join(" "),
+  }
+);
+
+describe("twoWay", () => {
+  it("should map an object", () => {
+    const mapped = userNameMapper.map(userA);
+    expectEqual(mapped, { firstName: "Scott", lastName: "Rippey" });
+  });
+  it("should reverse map an object", () => {
+    const reversed = userNameMapper.reverse(userB);
+    expectEqual(reversed, { fullName: "Scott Rippey" });
+  });
+});
 
 describe("combine", () => {
   it("should map asymmetric objects", () => {
@@ -91,7 +95,7 @@ describe("combine", () => {
     });
     expectEqual(mapped, {
       id: 5,
-      fullAddress: "1 Main Street, Eagle, ID 83616",
+      address: "1 Main Street, Eagle, ID 83616",
     });
   });
   it("should reverse map asymmetric objects", () => {
@@ -106,7 +110,3 @@ describe("combine", () => {
     });
   });
 });
-
-function expectEqual<T>(actual: T, expected: T) {
-  expect(actual).toEqual(expected);
-}
