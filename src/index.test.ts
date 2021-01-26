@@ -52,7 +52,7 @@ describe("properties", () => {
   });
 });
 
-const userNameMapper = mapper.asymmetric<
+const userNameMapper = mapper.twoWay<
   Pick<UserA, "fullName">,
   Pick<UserB, "firstName" | "lastName">
 >(
