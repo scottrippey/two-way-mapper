@@ -1,8 +1,8 @@
 {
   "name": "two-way-mapper",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "description": "",
-  "main": "dist/mapper.js",
+  "main": "dist/index.js",
   "files": [
     "dist",
     "src"
